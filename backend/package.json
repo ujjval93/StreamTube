@@ -2,11 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "I make youtube clone in this project.",
+  "type": "module",
   "license": "ISC",
   "author": "ujjval yadav",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
