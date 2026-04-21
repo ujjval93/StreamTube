@@ -100,15 +100,17 @@ const registerUser = asyncHandler(async (req, res) => {
 
 //Login user
 const loginUser = asyncHandler(async (req, res) =>{
-    //req body -> data
+    // req body -> data
     // username or email
-    // find the user
-    // password check
-    // access and refresh token
-    // send cookie
-    const {username, email, password} = req.body;
+    //find the user
+    //password check
+    //access and referesh token
+    //send cookie
 
-    if(!username || !email){
+    const {email, username, password} = req.body
+    console.log(email);
+
+    if (!username && !email) {
         throw new ApiError(400, "username or email is required")
     }
 
@@ -116,27 +118,37 @@ const loginUser = asyncHandler(async (req, res) =>{
         $or: [{username}, {email}]
     })
 
-    if(!user){
-        throw new ApiError(400, "user does not exist")
+    if (!user) {
+        throw new ApiError(404, "User does not exist")
     }
 
-    const isPasswordValid = await user.isPasswordCorrect(password)
+   const isPasswordValid = await user.isPasswordCorrect(password)
 
-    if(!isPasswordValid){
-        throw new ApiError(401, "wrong password")
+   if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials")
     }
 
-    const {refreshToken, accessToken} = await generateAccessAndRefreshTokens(user._id);
-    const loggedInUser = await User.findById(user._id).select("-Password -refreshToken")
+   const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id)
 
-    const options = {httpOnly: true, secure: true}
-    return res.status(200)
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-        new ApiResponse(200, {
-            user: loggedInUser, accessToken, refreshToken
-        }, "user logged in successfully")
+        new ApiResponse(
+            200, 
+            {
+                user: loggedInUser, accessToken, refreshToken
+            },
+            "User logged In Successfully"
+        )
     )
 })
 
