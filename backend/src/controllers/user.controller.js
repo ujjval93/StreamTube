@@ -17,19 +17,19 @@ const registerUser = asyncHandler(async (req, res) => {
     // return res.status 
 
     //how to take user detail, 1. req.body agar form se aa rhe he or json,  2. url,  
-    const {fullname, email, username, password} = req.body
+    const {fullName, email, username, password} = req.body
     console.log("email: ", email);
 
     //aise condn laga ke bari bari sab me check kr sakte ho -> m-2, 2 line me ho jayega
     // if(fullname === ""){ throw new ApiError(400, "fullname is required") }
     if(
-        [fullname, email, username, password].some((field) => field?.trim() === "")
+        [fullName, email, username, password].some((field) => field?.trim() === "")
     ){
         throw new ApiError(400, "All fields are required")
     }
 
     //validatation
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{username},{email}]
     })
     if(existedUser){
@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const avatarLacalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.Path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
    
     //check avatar
     if(!avatarLacalPath){
@@ -57,7 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
     //entry on database
     const user = await User.create({
         fullName,
-        avtar: avatar.url,
+        avatar: avatar.url,
         //if cover img url is present then pass url nhi to ""
         coverImage: coverImage?.url || "",
         email,
