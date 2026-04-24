@@ -218,14 +218,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
       .json(
-        new ApiError(
+        new ApiResponse(
           200,
           { accessToken, refreshToken: newRefreshToken },
           "Access Token refreshed"
         )
       );
   } catch (error) {
-    throw new ApiError(401, error?.massage || "Invalid Refresh Token");
+    throw new ApiError(401, error?.message || "Invalid Refresh Token");
   }
 });
 
@@ -233,7 +233,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const {oldPassword, newPassword} = req.body
   const user = await User.findById(req.user?._id)
-  const isPasswordCorrect = isPasswordCorrect(oldPassword)
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
   if(!isPasswordCorrect){
     throw new ApiError(400, "Invalid password")
@@ -243,8 +243,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   await user.save({validateBeforeSave: false})
 
   return 
-  res.status(200).
-  json(new ApiError(
+  res.status(200).json(
+    new ApiResponse(
     200, {},
     "Password changed successfully"
   ))
@@ -253,8 +253,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
 const getCurrentUser = asyncHandler(async (req, res) => {
   return 
-  res.status(200)
-  .json(new ApiError(
+  res.status(200).json(
+    new ApiResponse(
     200,
     req.user,
     "current user fetched successfully"
@@ -349,7 +349,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 const getUserChannelProfile =  asyncHandler(async (req, res) => {
   const {username} = req.params
 
-  if(!username?.trim){
+  if(!username?.trim()){
     throw new ApiError(400, "username is missing")
   }
 
@@ -371,7 +371,7 @@ const getUserChannelProfile =  asyncHandler(async (req, res) => {
       $lookup: {
         from: "subscriptions",
         localField: "_id",
-        foreignField: "subscribers",
+        foreignField: "subscriber",
         as: "subscribedTo"
       }
     },
@@ -410,10 +410,9 @@ const getUserChannelProfile =  asyncHandler(async (req, res) => {
     throw new ApiError(404, "channel does not exist")
   }
 
-  return res
-  .status(200)
-  .json(
-    new ApiError(200, channel[0], "User channel fetched successfully")
+  return 
+  res.status(200).json(
+    new ApiResponse(200, channel[0], "User channel fetched successfully")
   )
 
 })
@@ -435,7 +434,7 @@ const getWatchHistory = asyncHandler(async(req, res) => {
         pipeline: [
           {
             $lookup: {
-              from: "user",
+              from: "users",
               localField: "owner",
               foreignField: "_id",
               as: "owner",
@@ -462,12 +461,12 @@ const getWatchHistory = asyncHandler(async(req, res) => {
     }
   ])
 
-  return res
-  .status(200)
-  .json(
-    200,
-    user[0].getWatchHistory,
-    "watch history fetched successfully"
+  return 
+  res.status(200).json(
+      new ApiResponse(200,
+      user[0].watchHistory,
+      "watch history fetched successfully"
+    )
   )
 
 })
