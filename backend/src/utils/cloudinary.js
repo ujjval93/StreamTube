@@ -21,11 +21,23 @@ const uploadOnCloudinary = async (localFilePath) => {
         return response;
 
     } catch (error) {
+        console.error("CLOUDINARY UPLOAD ERROR:", error);
         fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation got failed
         return null;
     }
 }
 
+const deleteFromCloudinary = async (public_id, resource_type = "image") => {
+    try {
+        if (!public_id) return null;
+        const result = await cloudinary.uploader.destroy(public_id, {
+            resource_type,
+        });
+        return result;
+    } catch (error) {
+        console.error("Cloudinary delete error:", error);
+        return null;
+    }
+};
 
-
-export {uploadOnCloudinary}
+export {uploadOnCloudinary, deleteFromCloudinary}
