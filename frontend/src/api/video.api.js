@@ -8,14 +8,10 @@ export const getVideoById = (videoId) =>
     axiosInstance.get(`/videos/${videoId}`);
 
 export const publishVideo = (formData) =>
-    axiosInstance.post("/videos", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
+    axiosInstance.post("/videos", formData);
 
 export const updateVideo = (videoId, formData) =>
-    axiosInstance.patch(`/videos/${videoId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
+    axiosInstance.patch(`/videos/${videoId}`, formData);
 
 export const deleteVideo = (videoId) =>
     axiosInstance.delete(`/videos/${videoId}`);

@@ -5,14 +5,14 @@ import { logout, setCredentials } from "../store/slices/authSlice.js";
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
-    timeout: 10000,
+    timeout: 300000,
 });
 
 // ── Request interceptor — attach access token to every request ────────────
 axiosInstance.interceptors.request.use(
     (config) => {
         const state = store.getState();
-        const token = state.auth.accessToken;
+        const token = state.auth.accessToken || localStorage.getItem("accessToken"); 
 
         if (token) {
             config.headers["Authorization"] = `Bearer ${token}`;
