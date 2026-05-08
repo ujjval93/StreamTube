@@ -1,28 +1,140 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiHome, FiSearch, FiUpload, FiUser, FiClock } from "react-icons/fi";
 import Navbar from "./Navbar.jsx";
 import Sidebar from "./Sidebar.jsx";
 
+const mobileNavItems = [
+    { to: "/",            icon: FiHome,   label: "Home",    exact: true },
+    { to: "/history",     icon: FiClock,  label: "History", auth: true  },
+    { to: "/upload",      icon: FiUpload, label: "Upload",  auth: true  },
+];
+
+const pageVariants = {
+    initial:    { opacity: 0, y: 6 },
+    animate:    { opacity: 1, y: 0 },
+    exit:       { opacity: 0, y: -6 },
+    transition: { duration: 0.2, ease: "easeOut" },
+};
+
 const Layout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const { isAuthenticated, user }     = useSelector((state) => state.auth);
+    const location                      = useLocation();
 
     return (
-        <div className="min-h-screen bg-[#0f0f0f]">
-            {/* Navbar */}
+        <div className="min-h-screen" style={{ background: "#0f0f0f" }}>
             <Navbar onMenuClick={() => setSidebarOpen((prev) => !prev)} />
 
-            {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} />
+            <Sidebar
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+            />
 
-            {/* Main content */}
-            <main
-                className={`pt-16 transition-all duration-300 min-h-screen
-                ${sidebarOpen ? "lg:ml-56" : "lg:ml-20"}`}
+            <motion.main
+                animate={{
+                    marginLeft: sidebarOpen ? 240 : 72,
+                    transition: { type: "spring", stiffness: 300, damping: 30 },
+                }}
+                className="pt-16 pb-20 lg:pb-6 min-h-screen hidden lg:block"
             >
-                <div className="p-6">
-                    <Outlet />
+                <div className="p-6 max-w-450 mx-auto">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location.pathname}
+                            {...pageVariants}
+                        >
+                            <Outlet />
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+            </motion.main>
+
+            <main className="pt-16 pb-20 min-h-screen lg:hidden">
+                <div className="p-4">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location.pathname}
+                            {...pageVariants}
+                        >
+                            <Outlet />
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </main>
+
+            <nav
+                className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"
+                style={{
+                    background:          "rgba(15,15,15,0.98)",
+                    backdropFilter:      "blur(20px)",
+                    WebkitBackdropFilter:"blur(20px)",
+                    borderTop:           "1px solid rgba(255,255,255,0.06)",
+                }}
+            >
+                <div className="flex items-center justify-around px-2 py-2">
+                    {mobileNavItems.map(({ to, icon: Icon, label, exact, auth }) => {
+                        if (auth && !isAuthenticated) return null;
+                        return (
+                            <NavLink
+                                key={to}
+                                to={to}
+                                end={exact}
+                                className={({ isActive }) =>
+                                    `flex flex-col items-center gap-1 px-5 py-1.5 rounded-xl transition-all duration-150
+                                    ${isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"}`
+                                }
+                            >
+                                {({ isActive }) => (
+                                    <>
+                                        <div className="relative">
+                                            <Icon className="text-xl" />
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="mobileNav"
+                                                    className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                                                    style={{ background: "#ff3d3d" }}
+                                                />
+                                            )}
+                                        </div>
+                                        <span className="text-[10px] font-medium">{label}</span>
+                                    </>
+                                )}
+                            </NavLink>
+                        );
+                    })}
+
+                    {isAuthenticated ? (
+                        <NavLink
+                            to={`/channel/${user?.username}`}
+                            className={({ isActive }) =>
+                                `flex flex-col items-center gap-1 px-5 py-1.5 rounded-xl transition-all duration-150
+                                ${isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"}`
+                            }
+                        >
+                            <img
+                                src={user?.avatar}
+                                alt={user?.fullName}
+                                className="w-6 h-6 rounded-full object-cover"
+                            />
+                            <span className="text-[10px] font-medium">Profile</span>
+                        </NavLink>
+                    ) : (
+                        <NavLink
+                            to="/login"
+                            className={({ isActive }) =>
+                                `flex flex-col items-center gap-1 px-5 py-1.5 rounded-xl transition-all duration-150
+                                ${isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"}`
+                            }
+                        >
+                            <FiUser className="text-xl" />
+                            <span className="text-[10px] font-medium">Sign in</span>
+                        </NavLink>
+                    )}
+                </div>
+            </nav>
         </div>
     );
 };

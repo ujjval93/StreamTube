@@ -1,166 +1,237 @@
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
-import { FiSearch, FiUpload, FiBell, FiMenu, FiX } from "react-icons/fi";
-import { logout } from "../../store/slices/authSlice.js";
-import { logoutUser } from "../../api/auth.api.js";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+    FiSearch,
+    FiUpload,
+    FiBell,
+    FiMenu,
+    FiLogOut,
+    FiSettings,
+    FiGrid,
+    FiUser,
+    FiChevronRight,
+} from "react-icons/fi";
 import toast from "react-hot-toast";
+import { logoutUser } from "../../api/auth.api.js";
+import { logout } from "../../store/slices/authSlice.js";
+
+const dropdownVariants = {
+    initial:    { opacity: 0, y: 8, scale: 0.96 },
+    animate:    { opacity: 1, y: 0, scale: 1 },
+    exit:       { opacity: 0, y: 8, scale: 0.96 },
+    transition: { duration: 0.15, ease: "easeOut" },
+};
 
 const Navbar = ({ onMenuClick }) => {
     const { user, isAuthenticated } = useSelector((state) => state.auth);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState("");
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dispatch  = useDispatch();
+    const navigate  = useNavigate();
+
+    const [searchQuery,   setSearchQuery]   = useState("");
+    const [searchFocused, setSearchFocused] = useState(false);
+    const [dropdownOpen,  setDropdownOpen]  = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
-            navigate(`/?query=${searchQuery.trim()}`);
+            navigate(`/?query=${encodeURIComponent(searchQuery.trim())}`);
         }
     };
 
     const handleLogout = async () => {
         try {
             await logoutUser();
-            dispatch(logout());
-            toast.success("Logged out successfully");
-            navigate("/login");
         } catch {
+        } finally {
             dispatch(logout());
+            setDropdownOpen(false);
+            toast.success("Signed out successfully");
             navigate("/login");
         }
     };
 
+    const navLinks = [
+        { to: `/channel/${user?.username}`, icon: FiUser,     label: "Your Channel" },
+        { to: "/dashboard",                  icon: FiGrid,     label: "Dashboard"    },
+        { to: "/settings",                   icon: FiSettings, label: "Settings"     },
+    ];
+
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f0f0f] border-b border-white/10 h-16 flex items-center px-4 gap-4">
-            {/* Left — logo + hamburger */}
-            <div className="flex items-center gap-3 min-w-50">
+        <nav
+            className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-4 gap-4"
+            style={{
+                background:          "rgba(15, 15, 15, 0.95)",
+                backdropFilter:      "blur(20px)",
+                WebkitBackdropFilter:"blur(20px)",
+                borderBottom:        "1px solid rgba(255,255,255,0.06)",
+            }}
+        >
+            <div className="flex items-center gap-3 w-55 shrink-0">
                 <button
                     onClick={onMenuClick}
-                    className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center rounded-xl text-[#aaaaaa] hover:text-white hover:bg-white/8 transition-all duration-150"
                 >
-                    <FiMenu className="text-white text-xl" />
+                    <FiMenu className="text-xl" />
                 </button>
-                <Link to="/" className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-black text-sm">ST</span>
+
+                <Link to="/" className="flex items-center gap-2.5">
+                    <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: "#ff3d3d" }}
+                    >
+                        <span className="text-white font-black text-sm tracking-tight">ST</span>
                     </div>
                     <span className="text-white font-bold text-lg tracking-tight hidden sm:block">
-                        StreamTube
+                        Stream<span style={{ color: "#ff3d3d" }}>Tube</span>
                     </span>
                 </Link>
             </div>
 
-            {/* Center — search */}
-            <form
-                onSubmit={handleSearch}
-                className="flex-1 max-w-2xl mx-auto flex items-center"
-            >
-                <div className="flex w-full">
+            <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-auto">
+                <div
+                    className="flex items-center rounded-xl overflow-hidden transition-all duration-200"
+                    style={{
+                        background: searchFocused ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.05)",
+                        border:     searchFocused ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                >
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search"
-                        className="w-full bg-[#121212] border border-white/20 rounded-l-full px-5 py-2 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-blue-500 transition-colors"
+                        onFocus={() => setSearchFocused(true)}
+                        onBlur={() => setSearchFocused(false)}
+                        placeholder="Search videos, channels..."
+                        className="flex-1 bg-transparent px-4 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none"
                     />
                     <button
                         type="submit"
-                        className="bg-white/10 border border-white/20 border-l-0 rounded-r-full px-5 hover:bg-white/20 transition-colors"
+                        className="px-4 py-2.5 text-[#aaaaaa] hover:text-white transition-colors duration-150 border-l border-white/8"
                     >
-                        <FiSearch className="text-white text-lg" />
+                        <FiSearch className="text-lg" />
                     </button>
                 </div>
             </form>
 
-            {/* Right — actions */}
-            <div className="flex items-center gap-2 min-w-37.5 justify-end">
+            <div className="flex items-center gap-1.5 w-55 justify-end shrink-0">
                 {isAuthenticated ? (
                     <>
                         <Link
                             to="/upload"
-                            className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                            title="Upload video"
+                            className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium text-[#aaaaaa] hover:text-white hover:bg-white/8 transition-all duration-150"
                         >
-                            <FiUpload className="text-white text-xl" />
+                            <FiUpload className="text-base" />
+                            <span className="hidden md:inline">Upload</span>
                         </Link>
-                        <button className="p-2 rounded-full hover:bg-white/10 transition-colors">
-                            <FiBell className="text-white text-xl" />
+
+                        <button className="w-10 h-10 flex items-center justify-center rounded-xl text-[#aaaaaa] hover:text-white hover:bg-white/8 transition-all duration-150">
+                            <FiBell className="text-xl" />
                         </button>
 
-                        {/* Avatar dropdown */}
-                        <div className="relative">
+                        <div className="relative" ref={dropdownRef}>
                             <button
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
-                                className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/20 hover:border-white/50 transition-colors"
+                                onClick={() => setDropdownOpen((prev) => !prev)}
+                                className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl hover:bg-white/8 transition-all duration-150"
                             >
                                 <img
                                     src={user?.avatar}
                                     alt={user?.fullName}
-                                    className="w-full h-full object-cover"
+                                    className="w-8 h-8 rounded-lg object-cover"
                                 />
+                                <span className="text-sm text-white font-medium hidden lg:block max-w-25 truncate">
+                                    {user?.fullName?.split(" ")[0]}
+                                </span>
                             </button>
 
-                            {dropdownOpen && (
-                                <div className="absolute right-0 top-12 w-56 bg-[#212121] rounded-xl shadow-2xl border border-white/10 overflow-hidden z-50">
-                                    {/* User info */}
-                                    <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-                                        <img
-                                            src={user?.avatar}
-                                            alt={user?.fullName}
-                                            className="w-9 h-9 rounded-full object-cover"
-                                        />
-                                        <div className="overflow-hidden">
-                                            <p className="text-white text-sm font-medium truncate">
-                                                {user?.fullName}
-                                            </p>
-                                            <p className="text-white/50 text-xs truncate">
-                                                @{user?.username}
-                                            </p>
+                            <AnimatePresence>
+                                {dropdownOpen && (
+                                    <motion.div
+                                        {...dropdownVariants}
+                                        className="absolute right-0 top-12 w-60 rounded-2xl overflow-hidden z-50"
+                                        style={{
+                                            background:  "#181818",
+                                            border:      "1px solid rgba(255,255,255,0.08)",
+                                            boxShadow:   "0 8px 40px rgba(0,0,0,0.7)",
+                                        }}
+                                    >
+                                        <div className="p-4 border-b border-white/8">
+                                            <div className="flex items-center gap-3">
+                                                <img
+                                                    src={user?.avatar}
+                                                    alt={user?.fullName}
+                                                    className="w-10 h-10 rounded-xl object-cover"
+                                                />
+                                                <div className="min-w-0">
+                                                    <p className="text-white text-sm font-semibold truncate">
+                                                        {user?.fullName}
+                                                    </p>
+                                                    <p className="text-[#666] text-xs truncate">
+                                                        @{user?.username}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    {/* Links */}
-                                    <Link
-                                        to={`/channel/${user?.username}`}
-                                        onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/10 text-sm transition-colors"
-                                    >
-                                        Your channel
-                                    </Link>
-                                    <Link
-                                        to="/dashboard"
-                                        onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/10 text-sm transition-colors"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                    <Link
-                                        to="/settings"
-                                        onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center px-4 py-3 text-white/80 hover:bg-white/10 text-sm transition-colors"
-                                    >
-                                        Settings
-                                    </Link>
-                                    <div className="border-t border-white/10">
-                                        <button
-                                            onClick={handleLogout}
-                                            className="w-full text-left px-4 py-3 text-red-400 hover:bg-white/10 text-sm transition-colors"
-                                        >
-                                            Sign out
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+
+                                        <div className="p-2">
+                                            {navLinks.map(({ to, icon: Icon, label }) => (
+                                                <Link
+                                                    key={to}
+                                                    to={to}
+                                                    onClick={() => setDropdownOpen(false)}
+                                                    className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[#aaaaaa] hover:text-white hover:bg-white/6 transition-all duration-150 group"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <Icon className="text-base" />
+                                                        <span className="text-sm">{label}</span>
+                                                    </div>
+                                                    <FiChevronRight className="text-xs opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                </Link>
+                                            ))}
+                                        </div>
+
+                                        <div className="p-2 border-t border-white/8">
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-all duration-150"
+                                            >
+                                                <FiLogOut className="text-base" />
+                                                <span className="text-sm font-medium">Sign out</span>
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </>
                 ) : (
-                    <Link
-                        to="/login"
-                        className="flex items-center gap-2 border border-blue-500 text-blue-400 px-4 py-1.5 rounded-full text-sm hover:bg-blue-500/10 transition-colors"
-                    >
-                        Sign in
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to="/login"
+                            className="px-4 py-2 rounded-xl text-sm font-medium text-[#aaaaaa] hover:text-white hover:bg-white/8 transition-all duration-150"
+                        >
+                            Sign in
+                        </Link>
+                        <Link
+                            to="/register"
+                            className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all duration-150 active:scale-95"
+                            style={{ background: "#ff3d3d" }}
+                        >
+                            Sign up
+                        </Link>
+                    </div>
                 )}
             </div>
         </nav>
