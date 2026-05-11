@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useState } from "react";
-import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { FiEye, FiEyeOff, FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { loginUser } from "../api/auth.api.js";
 import { setCredentials } from "../store/slices/authSlice.js";
@@ -14,138 +15,182 @@ const Login = () => {
         formState: { errors, isSubmitting },
     } = useForm();
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [showPassword, setShowPassword] = useState(false);
+    const dispatch   = useDispatch();
+    const navigate   = useNavigate();
+    const [showPass, setShowPass] = useState(false);
 
     const onSubmit = async (data) => {
         try {
-            const response = await loginUser(data);
-            const { user, accessToken } = response.data.data;
-
+            const res              = await loginUser(data);
+            const { user, accessToken } = res.data.data;
             dispatch(setCredentials({ user, accessToken }));
-            toast.success(`Welcome back, ${user.fullName}!`);
+            toast.success(`Welcome back, ${user.fullName.split(" ")[0]}!`);
             navigate("/");
-        } catch (error) {
-            toast.error(
-                error?.response?.data?.message || "Login failed. Please try again."
-            );
+        } catch (err) {
+            toast.error(err?.response?.data?.message || "Invalid credentials");
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                {/* Logo */}
+        <div
+            className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+            style={{ background: "#0a0a0a" }}
+        >
+            <div
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-150 h-75 rounded-full opacity-20 blur-[120px] pointer-events-none"
+                style={{ background: "radial-gradient(circle, #ff3d3d 0%, transparent 70%)" }}
+            />
+
+            <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="w-full max-w-md relative z-10"
+            >
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-red-600 rounded-2xl mb-4">
-                        <span className="text-white font-black text-xl">ST</span>
-                    </div>
-                    <h1 className="text-white text-2xl font-bold">Sign in</h1>
-                    <p className="text-white/50 text-sm mt-1">
-                        to continue to StreamTube
+                    <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
+                        <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+                            style={{ background: "#ff3d3d", boxShadow: "0 4px 20px rgba(255,61,61,0.4)" }}
+                        >
+                            <span className="text-white font-black text-sm">ST</span>
+                        </div>
+                        <span className="text-white font-bold text-xl tracking-tight">
+                            Stream<span style={{ color: "#ff3d3d" }}>Tube</span>
+                        </span>
+                    </Link>
+                    <h1 className="text-white text-2xl font-bold tracking-tight">
+                        Welcome back
+                    </h1>
+                    <p className="text-[#555] text-sm mt-2">
+                        Sign in to continue watching
                     </p>
                 </div>
 
-                {/* Form card */}
-                <div className="bg-[#1a1a1a] rounded-2xl p-8 border border-white/10 shadow-2xl">
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                        {/* Username or Email */}
+                <div
+                    className="rounded-2xl p-8"
+                    style={{
+                        background: "#111111",
+                        border:     "1px solid rgba(255,255,255,0.07)",
+                    }}
+                >
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div>
-                            <label className="text-white/70 text-sm mb-1.5 block">
+                            <label className="text-[#666] text-xs uppercase tracking-wider mb-2 block">
                                 Username or Email
                             </label>
                             <div className="relative">
-                                <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-lg" />
+                                <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#444] text-sm" />
                                 <input
                                     type="text"
                                     placeholder="Enter username or email"
-                                    {...register("username", {
-                                        required: "Username or email is required",
-                                    })}
-                                    className="w-full bg-[#121212] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-blue-500 transition-colors"
+                                    {...register("username", { required: "This field is required" })}
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder:text-[#333] focus:outline-none transition-all duration-200"
+                                    style={{
+                                        background: "#1a1a1a",
+                                        border: errors.username
+                                            ? "1px solid rgba(255,61,61,0.5)"
+                                            : "1px solid rgba(255,255,255,0.07)",
+                                    }}
+                                    onFocus={(e) => {
+                                        if (!errors.username)
+                                            e.target.style.border = "1px solid rgba(255,255,255,0.2)";
+                                    }}
+                                    onBlur={(e) => {
+                                        if (!errors.username)
+                                            e.target.style.border = "1px solid rgba(255,255,255,0.07)";
+                                    }}
                                 />
                             </div>
                             {errors.username && (
-                                <p className="text-red-400 text-xs mt-1.5">
-                                    {errors.username.message}
-                                </p>
+                                <p className="text-[#ff3d3d] text-xs mt-1.5">{errors.username.message}</p>
                             )}
                         </div>
 
-                        {/* Password */}
                         <div>
-                            <label className="text-white/70 text-sm mb-1.5 block">
+                            <label className="text-[#666] text-xs uppercase tracking-wider mb-2 block">
                                 Password
                             </label>
                             <div className="relative">
-                                <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 text-lg" />
+                                <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#444] text-sm" />
                                 <input
-                                    type={showPassword ? "text" : "password"}
+                                    type={showPass ? "text" : "password"}
                                     placeholder="Enter your password"
                                     {...register("password", {
                                         required: "Password is required",
-                                        minLength: {
-                                            value: 6,
-                                            message: "Password must be at least 6 characters",
-                                        },
+                                        minLength: { value: 6, message: "At least 6 characters" },
                                     })}
-                                    className="w-full bg-[#121212] border border-white/10 rounded-xl pl-10 pr-12 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-blue-500 transition-colors"
+                                    className="w-full pl-10 pr-12 py-3 rounded-xl text-white text-sm placeholder:text-[#333] focus:outline-none transition-all duration-200"
+                                    style={{
+                                        background: "#1a1a1a",
+                                        border: errors.password
+                                            ? "1px solid rgba(255,61,61,0.5)"
+                                            : "1px solid rgba(255,255,255,0.07)",
+                                    }}
+                                    onFocus={(e) => {
+                                        if (!errors.password)
+                                            e.target.style.border = "1px solid rgba(255,255,255,0.2)";
+                                    }}
+                                    onBlur={(e) => {
+                                        if (!errors.password)
+                                            e.target.style.border = "1px solid rgba(255,255,255,0.07)";
+                                    }}
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                                    onClick={() => setShowPass((p) => !p)}
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#444] hover:text-[#888] transition-colors"
                                 >
-                                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                                    {showPass ? <FiEyeOff className="text-sm" /> : <FiEye className="text-sm" />}
                                 </button>
                             </div>
                             {errors.password && (
-                                <p className="text-red-400 text-xs mt-1.5">
-                                    {errors.password.message}
-                                </p>
+                                <p className="text-[#ff3d3d] text-xs mt-1.5">{errors.password.message}</p>
                             )}
                         </div>
 
-                        {/* Submit */}
-                        <button
+                        <motion.button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm mt-2"
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                            style={{
+                                background:  isSubmitting ? "#cc3030" : "#ff3d3d",
+                                boxShadow:   "0 4px 20px rgba(255,61,61,0.25)",
+                            }}
                         >
                             {isSubmitting ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                    </svg>
-                                    Signing in...
-                                </span>
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
                             ) : (
-                                "Sign in"
+                                <>
+                                    Sign in
+                                    <FiArrowRight className="text-sm" />
+                                </>
                             )}
-                        </button>
+                        </motion.button>
                     </form>
 
-                    {/* Divider */}
                     <div className="flex items-center gap-3 my-6">
-                        <div className="flex-1 h-px bg-white/10" />
-                        <span className="text-white/30 text-xs">or</span>
-                        <div className="flex-1 h-px bg-white/10" />
+                        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+                        <span className="text-[#333] text-xs">or</span>
+                        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
                     </div>
 
-                    {/* Register link */}
-                    <p className="text-center text-white/50 text-sm">
+                    <p className="text-center text-[#555] text-sm">
                         Don't have an account?{" "}
                         <Link
                             to="/register"
-                            className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                            className="font-semibold transition-colors duration-150"
+                            style={{ color: "#ff3d3d" }}
                         >
-                            Create account
+                            Create one
                         </Link>
                     </p>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };
