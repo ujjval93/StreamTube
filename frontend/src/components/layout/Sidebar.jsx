@@ -1,4 +1,4 @@
-import { NavLink, Link } from "react-router-dom";
+﻿import { NavLink, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,170 +13,153 @@ import {
     FiX,
 } from "react-icons/fi";
 
+const SIDEBAR_OPEN_WIDTH = 260;
+const SIDEBAR_COLLAPSED_WIDTH = 80;
+
 const mainLinks = [
-    { to: "/",        icon: FiHome,      label: "Home",         exact: true  },
-    { to: "/history", icon: FiClock,     label: "History",      auth: true   },
+    { to: "/", icon: FiHome, label: "Home", exact: true },
+    { to: "/history", icon: FiClock, label: "History", auth: true },
     { to: "/liked-videos", icon: FiThumbsUp, label: "Liked Videos", auth: true },
-    { to: "/playlists",    icon: FiList,     label: "Playlists",    auth: true },
+    { to: "/playlists", icon: FiList, label: "Playlists", auth: true },
 ];
 
 const creatorLinks = [
-    { to: "/upload",    icon: FiUpload, label: "Upload Video", auth: true },
-    { to: "/dashboard", icon: FiGrid,   label: "Dashboard",    auth: true },
-    { to: "/settings",  icon: FiSettings, label: "Settings",   auth: true },
+    { to: "/upload", icon: FiUpload, label: "Upload Video", auth: true },
+    { to: "/dashboard", icon: FiGrid, label: "Dashboard", auth: true },
+    { to: "/settings", icon: FiSettings, label: "Settings", auth: true },
 ];
 
-const sidebarVariants = {
-    open:   { x: 0,    transition: { type: "spring", stiffness: 300, damping: 30 } },
-    closed: { x: -280, transition: { type: "spring", stiffness: 300, damping: 30 } },
-};
+const labelLinks = [{ to: "/?sortBy=trending", icon: FiTrendingUp, label: "Trending" }];
 
-const overlayVariants = {
-    open:   { opacity: 1 },
-    closed: { opacity: 0 },
-};
+const navItemClasses = (isActive, collapsed) =>
+    `relative flex items-center ${collapsed ? "justify-center gap-0" : "gap-3.5"} px-3 py-3 rounded-2xl transition-all duration-150 ${
+        isActive
+            ? "bg-[#1a1a1b] text-white shadow-[0_10px_30px_rgba(255,61,61,0.12)]"
+            : "text-[#999] hover:text-white hover:bg-white/5"
+    }`;
 
-const NavItem = ({ to, icon: Icon, label, exact, isOpen }) => {
-    return (
-        <NavLink
-            to={to}
-            end={exact}
-            className={({ isActive }) =>
-                `relative flex items-center gap-3.5 px-3 py-2.5 rounded-xl transition-all duration-150 group
-                ${isActive
-                    ? "text-white"
-                    : "text-[#888] hover:text-white hover:bg-white/6"
-                }`
-            }
-        >
-            {({ isActive }) => (
-                <>
-                    {isActive && (
-                        <motion.div
-                            layoutId="activeNav"
-                            className="absolute inset-0 rounded-xl"
-                            style={{ background: "rgba(255,61,61,0.12)" }}
-                            transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                        />
-                    )}
-                    <div className="relative flex items-center gap-3.5 w-full">
-                        <Icon
-                            className={`text-lg shrink-0 transition-colors duration-150 ${
-                                isActive ? "text-[#ff3d3d]" : ""
-                            }`}
-                        />
-                        <AnimatePresence>
-                            {isOpen && (
-                                <motion.span
-                                    initial={{ opacity: 0, width: 0 }}
-                                    animate={{ opacity: 1, width: "auto" }}
-                                    exit={{ opacity: 0, width: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
-                                >
-                                    {label}
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </>
-            )}
-        </NavLink>
-    );
-};
+const NavItem = ({ to, icon: Icon, label, exact, collapsed }) => (
+    <NavLink end={exact} to={to} className={({ isActive }) => navItemClasses(isActive, collapsed)}>
+        <Icon className="text-lg" />
+        {!collapsed && <span className="text-sm font-medium">{label}</span>}
+    </NavLink>
+);
 
-const SectionLabel = ({ label, isOpen }) => {
-    if (!isOpen) return <div className="h-px bg-white/6 mx-2 my-2" />;
-    return (
-        <p className="px-3 pt-4 pb-1.5 text-xs font-semibold uppercase tracking-widest text-[#444]">
-            {label}
-        </p>
-    );
-};
-
-const Sidebar = ({ isOpen, onClose }) => {
+const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const desktopSidebarWidth = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_OPEN_WIDTH;
 
-    const sidebarContent = (
-        <div className="flex flex-col h-full py-3 overflow-y-auto overflow-x-hidden scrollbar-hide">
-            <div className="px-2 space-y-0.5">
+    const collapsedSidebarContent = (
+        <div className="flex h-full flex-col items-center overflow-hidden px-2 py-4">
+            <Link
+                to="/"
+                className="flex h-14 w-full items-center justify-center rounded-3xl border border-white/10 bg-[#101010] text-white transition hover:border-white/20"
+                onClick={onClose}
+            >
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff3d3d] text-sm font-bold text-white">ST</div>
+            </Link>
+
+            <div className="mt-6 flex w-full flex-col gap-2">
                 {mainLinks.map(({ to, icon, label, exact, auth }) => {
                     if (auth && !isAuthenticated) return null;
-                    return (
-                        <NavItem
-                            key={to}
-                            to={to}
-                            icon={icon}
-                            label={label}
-                            exact={exact}
-                            isOpen={isOpen}
-                        />
-                    );
+                    return <NavItem key={to} to={to} icon={icon} label={label} exact={exact} collapsed />;
                 })}
+
+                {isAuthenticated && creatorLinks.map(({ to, icon, label }) => (
+                    <NavItem key={to} to={to} icon={icon} label={label} collapsed />
+                ))}
+
+                {labelLinks.map(({ to, icon, label }) => (
+                    <NavItem key={to} to={to} icon={icon} label={label} collapsed />
+                ))}
             </div>
 
-            {isAuthenticated && (
-                <>
-                    <SectionLabel label="Creator" isOpen={isOpen} />
-                    <div className="px-2 space-y-0.5">
-                        {creatorLinks.map(({ to, icon, label }) => (
-                            <NavItem
-                                key={to}
-                                to={to}
-                                icon={icon}
-                                label={label}
-                                isOpen={isOpen}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-
-            {isAuthenticated && isOpen && user && (
-                <div className="mt-auto px-2 pt-4 pb-2">
+            {isAuthenticated && user && (
+                <div className="mt-auto flex w-full items-center justify-center">
                     <Link
                         to={`/channel/${user.username}`}
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/6 transition-all duration-150 group"
+                        className="flex h-12 w-12 items-center justify-center rounded-3xl bg-[#111] text-white transition hover:bg-white/5"
+                        onClick={onClose}
                     >
-                        <img
-                            src={user.avatar}
-                            alt={user.fullName}
-                            className="w-8 h-8 rounded-lg object-cover shrink-0"
-                        />
-                        <AnimatePresence>
-                            {isOpen && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="min-w-0"
-                                >
-                                    <p className="text-white text-sm font-medium truncate">
-                                        {user.fullName}
-                                    </p>
-                                    <p className="text-[#555] text-xs truncate">
-                                        View channel
-                                    </p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        <img src={user.avatar} alt={user.fullName} className="h-10 w-10 rounded-2xl object-cover" />
                     </Link>
                 </div>
             )}
         </div>
     );
 
+    const fullSidebarContent = (
+        <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-4 pb-6 scrollbar-hide">
+            <div className="mb-6 px-2">
+                <Link
+                    to="/"
+                    className="flex items-center gap-3 rounded-3xl border border-white/10 bg-[#101010] px-4 py-3 text-white transition hover:border-white/20"
+                    onClick={onClose}
+                >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff3d3d] text-sm font-bold text-white">ST</div>
+                    <div>
+                        <p className="text-sm font-semibold">StreamTube</p>
+                        <p className="text-xs text-[#999]">Creator Studio</p>
+                    </div>
+                </Link>
+            </div>
+
+            <div className="space-y-1 px-2">
+                {mainLinks.map(({ to, icon, label, exact, auth }) => {
+                    if (auth && !isAuthenticated) return null;
+                    return <NavItem key={to} to={to} icon={icon} label={label} exact={exact} collapsed={isCollapsed} />;
+                })}
+            </div>
+
+            {isAuthenticated && (
+                <div className="mt-6 rounded-3xl border border-white/10 bg-[#0f0f0f] p-4">
+                    <p className="text-xs uppercase tracking-[0.3em] text-[#777]">Creator</p>
+                    <div className="mt-3 space-y-2">
+                        {creatorLinks.map(({ to, icon, label }) => (
+                            <NavItem key={to} to={to} icon={icon} label={label} collapsed={isCollapsed} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div className="mt-6 rounded-3xl border border-white/10 bg-[#0f0f0f] p-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-[#777]">Explore</p>
+                <div className="mt-3 space-y-2">
+                    {labelLinks.map(({ to, icon, label }) => (
+                        <NavItem key={to} to={to} icon={icon} label={label} collapsed={isCollapsed} />
+                    ))}
+                </div>
+            </div>
+
+            {isAuthenticated && user && (
+                <div className="mt-auto rounded-3xl border border-white/10 bg-[#101010] p-4">
+                    <Link
+                        to={`/channel/${user.username}`}
+                        className={`flex items-center gap-3 rounded-3xl bg-[#111] p-3 transition hover:bg-white/5 ${isCollapsed ? "justify-center" : ""}`}
+                        onClick={onClose}
+                    >
+                        <img src={user.avatar} alt={user.fullName} className="h-11 w-11 rounded-2xl object-cover" />
+                        {!isCollapsed && (
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-white">{user.fullName}</p>
+                                <p className="truncate text-xs text-[#888]">View channel</p>
+                            </div>
+                        )}
+                    </Link>
+                </div>
+            )}
+        </div>
+    );
+
+    const sidebarContent = isCollapsed ? collapsedSidebarContent : fullSidebarContent;
+
     return (
         <>
             <motion.aside
-                animate={{ width: isOpen ? 240 : 72 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="fixed top-16 left-0 h-[calc(100vh-4rem)] z-40 hidden lg:block overflow-hidden"
-                style={{
-                    background:   "#0f0f0f",
-                    borderRight:  "1px solid rgba(255,255,255,0.05)",
-                }}
+                animate={{ width: desktopSidebarWidth }}
+                transition={{ type: "spring", stiffness: 280, damping: 30 }}
+                className="hidden lg:flex lg:flex-col lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:border-r lg:border-white/10 lg:bg-[#090909]"
+                style={{ minWidth: desktopSidebarWidth, width: desktopSidebarWidth }}
             >
                 {sidebarContent}
             </motion.aside>
@@ -185,85 +168,38 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {isOpen && (
                     <>
                         <motion.div
-                            variants={overlayVariants}
-                            initial="closed"
-                            animate="open"
-                            exit="closed"
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.18 }}
                             className="fixed inset-0 z-40 lg:hidden"
-                            style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
+                            style={{ background: "rgba(0,0,0,0.72)" }}
                             onClick={onClose}
                         />
-
                         <motion.aside
-                            variants={sidebarVariants}
-                            initial="closed"
-                            animate="open"
-                            exit="closed"
-                            className="fixed top-0 left-0 h-full w-64 z-50 lg:hidden flex flex-col"
-                            style={{
-                                background:  "#181818",
-                                borderRight: "1px solid rgba(255,255,255,0.08)",
-                            }}
+                            initial={{ x: -320 }}
+                            animate={{ x: 0 }}
+                            exit={{ x: -320 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="fixed top-0 left-0 z-50 flex h-full w-72 flex-col overflow-hidden border-r border-white/10 bg-[#101010]"
                         >
-                            <div
-                                className="flex items-center justify-between px-4 h-16 shrink-0"
-                                style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-                            >
-                                <Link to="/" className="flex items-center gap-2.5" onClick={onClose}>
-                                    <div
-                                        className="w-7 h-7 rounded-lg flex items-center justify-center"
-                                        style={{ background: "#ff3d3d" }}
-                                    >
-                                        <span className="text-white font-black text-xs">ST</span>
+                            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
+                                <Link to="/" className="flex items-center gap-3" onClick={onClose}>
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff3d3d] text-sm font-bold text-white">ST</div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-white">StreamTube</p>
+                                        <p className="text-xs text-[#888]">Creator Studio</p>
                                     </div>
-                                    <span className="text-white font-bold text-base tracking-tight">
-                                        Stream<span style={{ color: "#ff3d3d" }}>Tube</span>
-                                    </span>
                                 </Link>
                                 <button
                                     onClick={onClose}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[#666] hover:text-white hover:bg-white/8 transition-all duration-150"
+                                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 text-[#aaa] transition hover:border-white/20 hover:text-white"
                                 >
-                                    <FiX className="text-lg" />
+                                    <FiX />
                                 </button>
                             </div>
-
-                            <div className="flex-1 overflow-y-auto py-3 scrollbar-hide">
-                                <div className="px-2 space-y-0.5">
-                                    {mainLinks.map(({ to, icon, label, exact, auth }) => {
-                                        if (auth && !isAuthenticated) return null;
-                                        return (
-                                            <div key={to} onClick={onClose}>
-                                                <NavItem
-                                                    to={to}
-                                                    icon={icon}
-                                                    label={label}
-                                                    exact={exact}
-                                                    isOpen={true}
-                                                />
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {isAuthenticated && (
-                                    <>
-                                        <SectionLabel label="Creator" isOpen={true} />
-                                        <div className="px-2 space-y-0.5">
-                                            {creatorLinks.map(({ to, icon, label }) => (
-                                                <div key={to} onClick={onClose}>
-                                                    <NavItem
-                                                        to={to}
-                                                        icon={icon}
-                                                        label={label}
-                                                        isOpen={true}
-                                                    />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
+                            <div className="flex-1 overflow-y-auto scrollbar-hide">
+                                {fullSidebarContent}
                             </div>
                         </motion.aside>
                     </>

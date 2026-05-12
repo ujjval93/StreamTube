@@ -7,8 +7,8 @@ export const getAllVideos = (params) =>
 export const getVideoById = (videoId) =>
     axiosInstance.get(`/videos/${videoId}`);
 
-export const publishVideo = (formData) =>
-    axiosInstance.post("/videos", formData);
+export const publishVideo = (formData, config = {}) =>
+    axiosInstance.post("/videos", formData, config);
 
 export const updateVideo = (videoId, formData) =>
     axiosInstance.patch(`/videos/${videoId}`, formData);
