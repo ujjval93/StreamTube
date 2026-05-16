@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiHome, FiSearch, FiUpload, FiUser, FiClock } from "react-icons/fi";
+import { FiHome, FiUpload, FiUser, FiClock } from "react-icons/fi";
 import Navbar from "./Navbar.jsx";
 import Sidebar from "./Sidebar.jsx";
 
@@ -24,46 +24,42 @@ const Layout = () => {
     const { isAuthenticated, user }     = useSelector((state) => state.auth);
     const location                      = useLocation();
 
+    useEffect(() => {
+        const isMobile = window.innerWidth < 1024;
+        if (isMobile && sidebarOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [sidebarOpen]);
+
     return (
-        <div className="min-h-screen" style={{ background: "#0f0f0f" }}>
-            <Navbar onMenuClick={() => setSidebarOpen((prev) => !prev)} />
+        <div className="min-h-screen bg-[#0f0f0f] text-white">
+            <Navbar onMenuClick={() => setSidebarOpen((prev) => !prev)} isCollapsed={!sidebarOpen} />
 
-            <Sidebar
-                isOpen={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-            />
+            <div className="pt-16">
+                <div className="flex min-h-[calc(100vh-4rem)] overflow-hidden">
+                    <Sidebar
+                        isOpen={sidebarOpen}
+                        isCollapsed={!sidebarOpen}
+                        onClose={() => setSidebarOpen(false)}
+                    />
 
-            <motion.main
-                animate={{
-                    marginLeft: sidebarOpen ? 240 : 72,
-                    transition: { type: "spring", stiffness: 300, damping: 30 },
-                }}
-                className="pt-16 pb-20 lg:pb-6 min-h-screen hidden lg:block"
-            >
-                <div className="p-6 max-w-450 mx-auto">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={location.pathname}
-                            {...pageVariants}
-                        >
-                            <Outlet />
-                        </motion.div>
-                    </AnimatePresence>
+                    <main className="flex-1 overflow-x-hidden">
+                        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-6">
+                            <AnimatePresence mode="wait">
+                                <motion.div key={location.pathname} {...pageVariants}>
+                                    <Outlet />
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+                    </main>
                 </div>
-            </motion.main>
-
-            <main className="pt-16 pb-20 min-h-screen lg:hidden">
-                <div className="p-4">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={location.pathname}
-                            {...pageVariants}
-                        >
-                            <Outlet />
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-            </main>
+            </div>
 
             <nav
                 className="fixed bottom-0 left-0 right-0 z-50 lg:hidden"

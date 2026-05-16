@@ -1,16 +1,27 @@
-const VideoCardSkeleton = () => {
+const VideoCardSkeleton = ({ layout = "grid" }) => {
+    if (layout === "list") {
+        return (
+            <div className="flex gap-4 p-2">
+                <div className="w-44 sm:w-52 aspect-video rounded-xl shimmer shrink-0" />
+                <div className="flex-1 py-1 space-y-2.5">
+                    <div className="h-3.5 shimmer rounded-lg w-full" />
+                    <div className="h-3.5 shimmer rounded-lg w-4/5" />
+                    <div className="h-3 shimmer rounded-lg w-1/3 mt-1" />
+                    <div className="h-3 shimmer rounded-lg w-1/4" />
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="animate-pulse">
-            {/* Thumbnail */}
-            <div className="w-full aspect-video rounded-xl bg-white/10" />
-            {/* Info */}
+        <div>
+            <div className="w-full aspect-video rounded-xl shimmer" />
             <div className="flex gap-3 mt-3">
-                {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-white/10 shrink-0" />
-                <div className="flex-1 space-y-2">
-                    <div className="h-3.5 bg-white/10 rounded w-full" />
-                    <div className="h-3.5 bg-white/10 rounded w-3/4" />
-                    <div className="h-3 bg-white/10 rounded w-1/2" />
+                <div className="w-8 h-8 rounded-full shimmer shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-2 pt-0.5">
+                    <div className="h-3.5 shimmer rounded-lg w-full" />
+                    <div className="h-3.5 shimmer rounded-lg w-3/4" />
+                    <div className="h-3 shimmer rounded-lg w-1/2" />
                 </div>
             </div>
         </div>

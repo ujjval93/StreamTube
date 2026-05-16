@@ -1,158 +1,256 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiTrendingUp, FiClock, FiEye, FiRefreshCw } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+    FiTrendingUp,
+    FiClock,
+    FiZap,
+    FiFilm,
+    FiMusic,
+    FiCode,
+    FiTv as FiGamepad,
+    FiRefreshCw,
+    FiSearch,
+} from "react-icons/fi";
 import { getAllVideos } from "../api/video.api.js";
 import VideoCard from "../components/ui/VideoCard.jsx";
 import VideoCardSkeleton from "../components/ui/VideoCardSkeleton.jsx";
 import toast from "react-hot-toast";
 
 const SORT_OPTIONS = [
-    { label: "Latest", sortBy: "createdAt", sortType: "desc", icon: FiClock },
-    { label: "Most Viewed", sortBy: "views", sortType: "desc", icon: FiEye },
-    { label: "Trending", sortBy: "createdAt", sortType: "asc", icon: FiTrendingUp },
+    { label: "Latest",      sortBy: "createdAt", sortType: "desc", icon: FiClock      },
+    { label: "Trending",    sortBy: "views",      sortType: "desc", icon: FiTrendingUp },
+    { label: "Oldest",      sortBy: "createdAt", sortType: "asc",  icon: FiZap        },
+];
+
+const CATEGORY_FILTERS = [
+    { label: "All",       query: ""          },
+    { label: "Films",     query: "film"      },
+    { label: "Music",     query: "music"     },
+    { label: "Coding",    query: "code"      },
+    { label: "Gaming",    query: "gaming"    },
+    { label: "Vlog",      query: "vlog"      },
+    { label: "Education", query: "education" },
+    { label: "Sports",    query: "sports"    },
 ];
 
 const LIMIT = 12;
 
+const staggerContainer = {
+    animate: { transition: { staggerChildren: 0.05 } },
+};
+
 const Home = () => {
-    const [searchParams] = useSearchParams();
-    const query = searchParams.get("query") || "";
+    const [searchParams]                      = useSearchParams();
+    const urlQuery                            = searchParams.get("query") || "";
 
-    const [videos, setVideos] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [videos,          setVideos]          = useState([]);
+    const [isLoading,       setIsLoading]       = useState(true);
+    const [isLoadingMore,   setIsLoadingMore]   = useState(false);
+    const [page,            setPage]            = useState(1);
+    const [totalPages,      setTotalPages]      = useState(1);
     const [activeSortIndex, setActiveSortIndex] = useState(0);
+    const [activeCategory,  setActiveCategory]  = useState(0);
 
-    const activeSort = SORT_OPTIONS[activeSortIndex];
+    const activeSort     = SORT_OPTIONS[activeSortIndex];
+    const activeQuery    = urlQuery || CATEGORY_FILTERS[activeCategory].query;
+    const loadMoreRef    = useRef(null);
 
     const fetchVideos = useCallback(
         async (pageNum = 1, reset = false) => {
             try {
-                setIsLoading(true);
+                reset ? setIsLoading(true) : setIsLoadingMore(true);
+
                 const response = await getAllVideos({
-                    page: pageNum,
-                    limit: LIMIT,
-                    query,
-                    sortBy: activeSort.sortBy,
+                    page:     pageNum,
+                    limit:    LIMIT,
+                    query:    activeQuery,
+                    sortBy:   activeSort.sortBy,
                     sortType: activeSort.sortType,
                 });
 
                 const { videos: newVideos, totalPages: tp } = response.data.data;
 
-                setVideos((prev) => (reset ? newVideos : [...prev, ...newVideos]));
+                setVideos((prev) => reset ? newVideos : [...prev, ...newVideos]);
                 setTotalPages(tp);
                 setPage(pageNum);
             } catch {
                 toast.error("Failed to load videos");
             } finally {
                 setIsLoading(false);
+                setIsLoadingMore(false);
             }
         },
-        [query, activeSort.sortBy, activeSort.sortType]
+        [activeQuery, activeSort.sortBy, activeSort.sortType]
     );
 
-    // Reset and fetch on query/sort change
     useEffect(() => {
         setVideos([]);
         setPage(1);
         fetchVideos(1, true);
-    }, [query, activeSortIndex]);
+    }, [urlQuery, activeSortIndex, activeCategory]);
 
-    const handleSortChange = (index) => {
-        if (index === activeSortIndex) return;
-        setActiveSortIndex(index);
-    };
-
-    const handleLoadMore = () => {
-        fetchVideos(page + 1);
-    };
+    useEffect(() => {
+        if (!loadMoreRef.current) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && page < totalPages && !isLoadingMore && !isLoading) {
+                    fetchVideos(page + 1);
+                }
+            },
+            { threshold: 0.1 }
+        );
+        observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [page, totalPages, isLoadingMore, isLoading, fetchVideos]);
 
     return (
-        <div>
-            {/* Filter / Sort bar */}
-            <div className="flex items-center gap-2 mb-6 flex-wrap">
-                {SORT_OPTIONS.map((opt, i) => {
-                    const Icon = opt.icon;
-                    return (
-                        <button
-                            key={opt.label}
-                            onClick={() => handleSortChange(i)}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors
-                            ${activeSortIndex === i
-                                ? "bg-white text-black"
-                                : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
-                            }`}
-                        >
-                            <Icon className="text-sm" />
-                            {opt.label}
-                        </button>
-                    );
-                })}
+        <div className="mx-auto max-w-screen-2xl px-4 py-6">
+            <div
+                className="sticky top-16 z-30 mb-6 px-0 py-3"
+                style={{
+                    background:          "rgba(15,15,15,0.95)",
+                    backdropFilter:      "blur(12px)",
+                    WebkitBackdropFilter:"blur(12px)",
+                    borderBottom:        "1px solid rgba(255,255,255,0.05)",
+                }}
+            >
+                <div className="flex flex-wrap items-center gap-3 overflow-x-auto scrollbar-hide">
+                    {!urlQuery && (
+                        <>
+                            <div className="flex items-center gap-2 shrink-0">
+                                {SORT_OPTIONS.map((opt, i) => {
+                                    const Icon = opt.icon;
+                                    return (
+                                        <motion.button
+                                            key={opt.label}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setActiveSortIndex(i)}
+                                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150 shrink-0"
+                                            style={{
+                                                background: activeSortIndex === i ? "#ff3d3d" : "rgba(255,255,255,0.07)",
+                                                color:      activeSortIndex === i ? "#fff"    : "#888",
+                                                border:     activeSortIndex === i ? "1px solid #ff3d3d" : "1px solid rgba(255,255,255,0.08)",
+                                            }}
+                                        >
+                                            <Icon className="text-sm" />
+                                            {opt.label}
+                                        </motion.button>
+                                    );
+                                })}
+                            </div>
 
-                {query && (
-                    <span className="ml-auto text-white/40 text-sm">
-                        Results for:{" "}
-                        <span className="text-white font-medium">"{query}"</span>
-                    </span>
-                )}
-            </div>
+                            <div
+                                className="w-px h-5 shrink-0"
+                                style={{ background: "rgba(255,255,255,0.1)" }}
+                            />
 
-            {/* Video grid */}
-            {isLoading && videos.length === 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {Array.from({ length: LIMIT }).map((_, i) => (
-                        <VideoCardSkeleton key={i} />
-                    ))}
-                </div>
-            ) : videos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 gap-4">
-                    <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center">
-                        <FiEye className="text-white/20 text-3xl" />
-                    </div>
-                    <p className="text-white/40 text-lg">No videos found</p>
-                    {query && (
-                        <button
-                            onClick={() => window.history.back()}
-                            className="text-blue-400 text-sm hover:underline"
-                        >
-                            Clear search
-                        </button>
+                            <div className="flex items-center gap-2 shrink-0">
+                                {CATEGORY_FILTERS.map((cat, i) => (
+                                    <motion.button
+                                        key={cat.label}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setActiveCategory(i)}
+                                        className="px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150 shrink-0"
+                                        style={{
+                                            background: activeCategory === i ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)",
+                                            color:      activeCategory === i ? "#fff" : "#666",
+                                            border:     activeCategory === i ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.06)",
+                                        }}
+                                    >
+                                        {cat.label}
+                                    </motion.button>
+                                ))}
+                            </div>
+                        </>
                     )}
-                </div>
-            ) : (
-                <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {videos.map((video) => (
-                            <VideoCard key={video._id} video={video} />
-                        ))}
-                        {/* Skeleton for loading more */}
-                        {isLoading &&
-                            Array.from({ length: 4 }).map((_, i) => (
-                                <VideoCardSkeleton key={`sk-${i}`} />
-                            ))}
-                    </div>
 
-                    {/* Load more */}
-                    {page < totalPages && !isLoading && (
-                        <div className="flex justify-center mt-10">
-                            <button
-                                onClick={handleLoadMore}
-                                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full text-sm font-medium transition-colors"
-                            >
-                                <FiRefreshCw className="text-sm" />
-                                Load more
-                            </button>
+                    {urlQuery && (
+                        <div className="flex items-center gap-2">
+                            <FiSearch className="text-[#ff3d3d] text-sm" />
+                            <span className="text-[#888] text-sm">
+                                Results for{" "}
+                                <span className="text-white font-semibold">
+                                    "{urlQuery}"
+                                </span>
+                            </span>
                         </div>
                     )}
+                </div>
+            </div>
 
-                    {page >= totalPages && videos.length > 0 && (
-                        <p className="text-center text-white/20 text-sm mt-10">
-                            You've reached the end
-                        </p>
-                    )}
-                </>
-            )}
+            <AnimatePresence mode="wait">
+                {isLoading ? (
+                    <motion.div
+                        key="skeleton"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                    >
+                        {Array.from({ length: LIMIT }).map((_, i) => (
+                            <VideoCardSkeleton key={i} layout="grid" />
+                        ))}
+                    </motion.div>
+                ) : videos.length === 0 ? (
+                    <motion.div
+                        key="empty"
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center py-32 gap-4"
+                    >
+                        <div
+                            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                            style={{ background: "rgba(255,61,61,0.1)" }}
+                        >
+                            <FiSearch className="text-[#ff3d3d] text-3xl" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-white font-semibold text-lg">
+                                No videos found
+                            </p>
+                            <p className="text-[#666] text-sm mt-1">
+                                {urlQuery
+                                    ? `No results for "${urlQuery}"`
+                                    : "Be the first to upload a video"}
+                            </p>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="grid"
+                        variants={staggerContainer}
+                        initial="initial"
+                        animate="animate"
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                            {videos.map((video) => (
+                                <VideoCard
+                                    key={video._id}
+                                    video={video}
+                                    layout="grid"
+                                />
+                            ))}
+                            {isLoadingMore &&
+                                Array.from({ length: 4 }).map((_, i) => (
+                                    <VideoCardSkeleton key={`more-${i}`} layout="grid" />
+                                ))}
+                        </div>
+
+                        <div ref={loadMoreRef} className="h-10 mt-8" />
+
+                        {page >= totalPages && videos.length > 0 && (
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center text-[#333] text-sm py-8"
+                            >
+                                You've seen everything
+                            </motion.p>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
