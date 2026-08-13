@@ -32,7 +32,7 @@ const creatorLinks = [
 const labelLinks = [{ to: "/?sortBy=trending", icon: FiTrendingUp, label: "Trending" }];
 
 const navItemClasses = (isActive, collapsed) =>
-    `relative flex items-center ${collapsed ? "justify-center gap-0" : "gap-3.5"} px-3 py-3 rounded-2xl transition-all duration-150 ${
+    `relative flex ${collapsed ? "flex-col items-center justify-center gap-1.5" : "items-center gap-3.5"} px-3 py-2.5 rounded-2xl transition-all duration-150 ${
         isActive
             ? "bg-[#1a1a1b] text-white shadow-[0_10px_30px_rgba(255,61,61,0.12)]"
             : "text-[#999] hover:text-white hover:bg-white/5"
@@ -40,8 +40,8 @@ const navItemClasses = (isActive, collapsed) =>
 
 const NavItem = ({ to, icon: Icon, label, exact, collapsed }) => (
     <NavLink end={exact} to={to} className={({ isActive }) => navItemClasses(isActive, collapsed)}>
-        <Icon className="text-lg" />
-        {!collapsed && <span className="text-sm font-medium">{label}</span>}
+        <Icon className={collapsed ? "text-lg" : "text-lg"} />
+        {collapsed ? <span className="text-[10px] leading-none">{label}</span> : <span className="text-sm font-medium">{label}</span>}
     </NavLink>
 );
 
@@ -55,8 +55,15 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
                 to="/"
                 className="flex h-14 w-full items-center justify-center rounded-3xl border border-white/10 bg-[#101010] text-white transition hover:border-white/20"
                 onClick={onClose}
+                aria-label="StreamTube home"
             >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff3d3d] text-sm font-bold text-white">ST</div>
+                <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-[#ff3d3d]">
+                    <img
+                        src="/logo.png"
+                        alt="StreamTube"
+                        className="absolute -left-7.75 -top-2 h-27.5 w-27.5 max-w-none object-contain"
+                    />
+                </div>
             </Link>
 
             <div className="mt-6 flex w-full flex-col gap-2">
@@ -65,13 +72,19 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
                     return <NavItem key={to} to={to} icon={icon} label={label} exact={exact} collapsed />;
                 })}
 
-                {isAuthenticated && creatorLinks.map(({ to, icon, label }) => (
-                    <NavItem key={to} to={to} icon={icon} label={label} collapsed />
-                ))}
+                {isAuthenticated && (
+                    <div className="mt-2 w-full border-t border-white/10 pt-2">
+                        {creatorLinks.map(({ to, icon, label }) => (
+                            <NavItem key={to} to={to} icon={icon} label={label} collapsed />
+                        ))}
+                    </div>
+                )}
 
-                {labelLinks.map(({ to, icon, label }) => (
-                    <NavItem key={to} to={to} icon={icon} label={label} collapsed />
-                ))}
+                <div className="mt-2 w-full border-t border-white/10 pt-2">
+                    {labelLinks.map(({ to, icon, label }) => (
+                        <NavItem key={to} to={to} icon={icon} label={label} collapsed />
+                    ))}
+                </div>
             </div>
 
             {isAuthenticated && user && (
@@ -90,13 +103,20 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
 
     const fullSidebarContent = (
         <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-4 pb-6 scrollbar-hide">
-            <div className="mb-6 px-2">
+            <div className="mb-5 px-2">
                 <Link
                     to="/"
                     className="flex items-center gap-3 rounded-3xl border border-white/10 bg-[#101010] px-4 py-3 text-white transition hover:border-white/20"
                     onClick={onClose}
+                    aria-label="StreamTube home"
                 >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff3d3d] text-sm font-bold text-white">ST</div>
+                    <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-[#ff3d3d]">
+                        <img
+                            src="/logo.png"
+                            alt="StreamTube"
+                            className="absolute -left-7.75 -top-2 h-27.5 w-27.5 max-w-none object-contain"
+                        />
+                    </div>
                     <div>
                         <p className="text-sm font-semibold">StreamTube</p>
                         <p className="text-xs text-[#999]">Creator Studio</p>
@@ -107,26 +127,26 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
             <div className="space-y-1 px-2">
                 {mainLinks.map(({ to, icon, label, exact, auth }) => {
                     if (auth && !isAuthenticated) return null;
-                    return <NavItem key={to} to={to} icon={icon} label={label} exact={exact} collapsed={isCollapsed} />;
+                    return <NavItem key={to} to={to} icon={icon} label={label} exact={exact} collapsed={false} />;
                 })}
             </div>
 
             {isAuthenticated && (
-                <div className="mt-6 rounded-3xl border border-white/10 bg-[#0f0f0f] p-4">
-                    <p className="text-xs uppercase tracking-[0.3em] text-[#777]">Creator</p>
-                    <div className="mt-3 space-y-2">
+                <div className="mt-6 border-t border-white/10 pt-4">
+                    <p className="px-2 text-[10px] font-medium uppercase tracking-[0.28em] text-[#777]">Creator</p>
+                    <div className="mt-3 space-y-1 px-2">
                         {creatorLinks.map(({ to, icon, label }) => (
-                            <NavItem key={to} to={to} icon={icon} label={label} collapsed={isCollapsed} />
+                            <NavItem key={to} to={to} icon={icon} label={label} collapsed={false} />
                         ))}
                     </div>
                 </div>
             )}
 
-            <div className="mt-6 rounded-3xl border border-white/10 bg-[#0f0f0f] p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#777]">Explore</p>
-                <div className="mt-3 space-y-2">
+            <div className="mt-6 border-t border-white/10 pt-4">
+                <p className="px-2 text-[10px] font-medium uppercase tracking-[0.28em] text-[#777]">Explore</p>
+                <div className="mt-3 space-y-1 px-2">
                     {labelLinks.map(({ to, icon, label }) => (
-                        <NavItem key={to} to={to} icon={icon} label={label} collapsed={isCollapsed} />
+                        <NavItem key={to} to={to} icon={icon} label={label} collapsed={false} />
                     ))}
                 </div>
             </div>
@@ -184,8 +204,14 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
                             className="fixed top-0 left-0 z-50 flex h-full w-72 flex-col overflow-hidden border-r border-white/10 bg-[#101010]"
                         >
                             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-                                <Link to="/" className="flex items-center gap-3" onClick={onClose}>
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff3d3d] text-sm font-bold text-white">ST</div>
+                                <Link to="/" className="flex items-center gap-3" onClick={onClose} aria-label="StreamTube home">
+                                    <div className="relative h-10 w-10 overflow-hidden rounded-2xl bg-[#ff3d3d]">
+                                        <img
+                                            src="/logo.png"
+                                            alt="StreamTube"
+                                            className="absolute -left-7 -top-1.75 h-27.5 w-27.5 max-w-none object-contain"
+                                        />
+                                    </div>
                                     <div>
                                         <p className="text-sm font-semibold text-white">StreamTube</p>
                                         <p className="text-xs text-[#888]">Creator Studio</p>

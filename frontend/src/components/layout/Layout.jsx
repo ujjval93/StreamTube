@@ -49,8 +49,8 @@ const Layout = () => {
                         onClose={() => setSidebarOpen(false)}
                     />
 
-                    <main className="flex-1 overflow-x-hidden">
-                        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-6">
+                    <main className="flex-1 overflow-x-hidden pb-20 lg:pb-0">
+                        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
                             <AnimatePresence mode="wait">
                                 <motion.div key={location.pathname} {...pageVariants}>
                                     <Outlet />
@@ -70,7 +70,7 @@ const Layout = () => {
                     borderTop:           "1px solid rgba(255,255,255,0.06)",
                 }}
             >
-                <div className="flex items-center justify-around px-2 py-2">
+                <div className="grid grid-cols-4 items-center gap-1 px-1 py-2">
                     {mobileNavItems.map(({ to, icon: Icon, label, exact, auth }) => {
                         if (auth && !isAuthenticated) return null;
                         return (
@@ -79,23 +79,24 @@ const Layout = () => {
                                 to={to}
                                 end={exact}
                                 className={({ isActive }) =>
-                                    `flex flex-col items-center gap-1 px-5 py-1.5 rounded-xl transition-all duration-150
-                                    ${isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"}`
+                                    `flex min-h-13 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 transition-all duration-150 ${
+                                        isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"
+                                    }`
                                 }
                             >
                                 {({ isActive }) => (
                                     <>
-                                        <div className="relative">
-                                            <Icon className="text-xl" />
+                                        <div className="relative flex items-center justify-center">
+                                            <Icon className="text-lg" />
                                             {isActive && (
                                                 <motion.div
                                                     layoutId="mobileNav"
-                                                    className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                                                    className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full"
                                                     style={{ background: "#ff3d3d" }}
                                                 />
                                             )}
                                         </div>
-                                        <span className="text-[10px] font-medium">{label}</span>
+                                        <span className="text-[10px] font-medium leading-none">{label}</span>
                                     </>
                                 )}
                             </NavLink>
@@ -106,27 +107,29 @@ const Layout = () => {
                         <NavLink
                             to={`/channel/${user?.username}`}
                             className={({ isActive }) =>
-                                `flex flex-col items-center gap-1 px-5 py-1.5 rounded-xl transition-all duration-150
-                                ${isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"}`
+                                `flex min-h-13 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 transition-all duration-150 ${
+                                    isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"
+                                }`
                             }
                         >
                             <img
                                 src={user?.avatar}
                                 alt={user?.fullName}
-                                className="w-6 h-6 rounded-full object-cover"
+                                className="h-6 w-6 rounded-full object-cover"
                             />
-                            <span className="text-[10px] font-medium">Profile</span>
+                            <span className="text-[10px] font-medium leading-none">Profile</span>
                         </NavLink>
                     ) : (
                         <NavLink
                             to="/login"
                             className={({ isActive }) =>
-                                `flex flex-col items-center gap-1 px-5 py-1.5 rounded-xl transition-all duration-150
-                                ${isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"}`
+                                `flex min-h-13 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 transition-all duration-150 ${
+                                    isActive ? "text-[#ff3d3d]" : "text-[#666] hover:text-white"
+                                }`
                             }
                         >
-                            <FiUser className="text-xl" />
-                            <span className="text-[10px] font-medium">Sign in</span>
+                            <FiUser className="text-lg" />
+                            <span className="text-[10px] font-medium leading-none">Sign in</span>
                         </NavLink>
                     )}
                 </div>

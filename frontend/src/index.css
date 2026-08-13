@@ -180,6 +180,13 @@ video {
     aspect-ratio: 16 / 9;
 }
 
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px 24px;
+    width: 100%;
+}
+
 img {
     transition: opacity var(--transition-base);
 }

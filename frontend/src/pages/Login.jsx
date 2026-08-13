@@ -43,7 +43,7 @@ const Login = () => {
                     transition={{ duration: 0.4, ease: "easeOut" }}
                     className="relative grid gap-8 md:grid-cols-[1.1fr_0.9fr]"
                 >
-                    <div className="rounded-[32px] border border-white/10 bg-[#0f0f0f] p-8 lg:p-10">
+                    <div className="rounded-4xl border border-white/10 bg-[#0f0f0f] p-8 lg:p-10">
                         <div className="mb-6">
                             <p className="text-xs uppercase tracking-[0.35em] text-[#888]">Welcome back</p>
                             <h1 className="mt-4 text-4xl font-semibold text-white">Sign in to StreamTube</h1>
@@ -64,7 +64,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="rounded-[32px] border border-white/10 bg-[#121212] p-8 lg:p-10">
+                    <div className="rounded-4xl border border-white/10 bg-[#121212] p-8 lg:p-10">
                         <div className="mb-6">
                             <p className="text-xs uppercase tracking-[0.35em] text-[#888]">Access your account</p>
                             <h2 className="mt-2 text-3xl font-semibold text-white">Sign in</h2>
@@ -79,7 +79,7 @@ const Login = () => {
                                         type="text"
                                         placeholder="Your username or email"
                                         {...register("username", { required: "Username or email is required" })}
-                                        className="w-full rounded-[24px] border border-white/10 bg-[#101010] px-12 py-3 text-white placeholder:text-[#666] outline-none transition duration-200 focus:border-[#ff3d3d]"
+                                        className="w-full rounded-3xl border border-white/10 bg-[#101010] px-12 py-3 text-white placeholder:text-[#666] outline-none transition duration-200 focus:border-[#ff3d3d]"
                                     />
                                 </div>
                                 {errors.username && <p className="mt-2 text-xs text-[#ff6b6b]">{errors.username.message}</p>}
@@ -96,7 +96,7 @@ const Login = () => {
                                             required: "Password is required",
                                             minLength: { value: 6, message: "At least 6 characters" },
                                         })}
-                                        className="w-full rounded-[24px] border border-white/10 bg-[#101010] px-12 py-3 pr-14 text-white placeholder:text-[#666] outline-none transition duration-200 focus:border-[#ff3d3d]"
+                                        className="w-full rounded-3xl border border-white/10 bg-[#101010] px-12 py-3 pr-14 text-white placeholder:text-[#666] outline-none transition duration-200 focus:border-[#ff3d3d]"
                                     />
                                     <button
                                         type="button"
@@ -112,7 +112,7 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={!isValid || isSubmitting}
-                                className="flex w-full items-center justify-center gap-2 rounded-[24px] bg-[#ff3d3d] px-5 py-3 text-sm font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-[#ff5757]"
+                                className="flex w-full items-center justify-center gap-2 rounded-3xl bg-[#ff3d3d] px-5 py-3 text-sm font-semibold text-white transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-[#ff5757]"
                             >
                                 {isSubmitting ? "Signing in..." : "Sign in"}
                                 <FiArrowRight className="text-base" />

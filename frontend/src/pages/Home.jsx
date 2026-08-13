@@ -18,9 +18,9 @@ import VideoCardSkeleton from "../components/ui/VideoCardSkeleton.jsx";
 import toast from "react-hot-toast";
 
 const SORT_OPTIONS = [
-    { label: "Latest",      sortBy: "createdAt", sortType: "desc", icon: FiClock      },
-    { label: "Trending",    sortBy: "views",      sortType: "desc", icon: FiTrendingUp },
-    { label: "Oldest",      sortBy: "createdAt", sortType: "asc",  icon: FiZap        },
+    { label: "Latest",   sortBy: "createdAt", sortType: "desc", icon: FiClock      },
+    { label: "Trending", sortBy: "views",      sortType: "desc", icon: FiTrendingUp },
+    { label: "Oldest",   sortBy: "createdAt", sortType: "asc",  icon: FiZap        },
 ];
 
 const CATEGORY_FILTERS = [
@@ -105,9 +105,9 @@ const Home = () => {
     }, [page, totalPages, isLoadingMore, isLoading, fetchVideos]);
 
     return (
-        <div className="mx-auto max-w-screen-2xl px-4 py-6">
+        <div className="w-full">
             <div
-                className="sticky top-16 z-30 mb-6 px-0 py-3"
+                className="sticky top-16 z-30 mb-6 px-4 py-3"
                 style={{
                     background:          "rgba(15,15,15,0.95)",
                     backdropFilter:      "blur(12px)",
@@ -128,9 +128,9 @@ const Home = () => {
                                             onClick={() => setActiveSortIndex(i)}
                                             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150 shrink-0"
                                             style={{
-                                                background: activeSortIndex === i ? "#ff3d3d" : "rgba(255,255,255,0.07)",
-                                                color:      activeSortIndex === i ? "#fff"    : "#888",
-                                                border:     activeSortIndex === i ? "1px solid #ff3d3d" : "1px solid rgba(255,255,255,0.08)",
+                                                background: activeSortIndex === i ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)",
+                                                color:      activeSortIndex === i ? "#fff" : "#888",
+                                                border:     activeSortIndex === i ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.08)",
                                             }}
                                         >
                                             <Icon className="text-sm" />
@@ -186,7 +186,7 @@ const Home = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+                        className="px-4 video-grid"
                     >
                         {Array.from({ length: LIMIT }).map((_, i) => (
                             <VideoCardSkeleton key={i} layout="grid" />
@@ -197,7 +197,7 @@ const Home = () => {
                         key="empty"
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex flex-col items-center justify-center py-32 gap-4"
+                        className="px-4 flex flex-col items-center justify-center py-32 gap-4"
                     >
                         <div
                             className="w-20 h-20 rounded-2xl flex items-center justify-center"
@@ -222,8 +222,9 @@ const Home = () => {
                         variants={staggerContainer}
                         initial="initial"
                         animate="animate"
+                        className="px-4"
                     >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        <div className="video-grid">
                             {videos.map((video) => (
                                 <VideoCard
                                     key={video._id}
