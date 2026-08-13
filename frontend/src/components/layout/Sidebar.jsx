@@ -47,7 +47,6 @@ const NavItem = ({ to, icon: Icon, label, exact, collapsed }) => (
 
 const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
     const { isAuthenticated, user } = useSelector((state) => state.auth);
-    const desktopSidebarWidth = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_OPEN_WIDTH;
 
     const collapsedSidebarContent = (
         <div className="flex h-full flex-col items-center overflow-hidden px-2 py-4">
@@ -57,11 +56,11 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
                 onClick={onClose}
                 aria-label="StreamTube home"
             >
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-[#ff3d3d]">
+                <div className="flex h-11 w-11 items-center justify-center shrink-0 overflow-hidden rounded-2xl bg-[#ff3d3d]">
                     <img
                         src="/logo.png"
                         alt="StreamTube"
-                        className="absolute -left-7.75 -top-2 h-27.5 w-27.5 max-w-none object-contain"
+                        className="h-full w-full object-contain"
                     />
                 </div>
             </Link>
@@ -103,26 +102,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
 
     const fullSidebarContent = (
         <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-4 pb-6 scrollbar-hide">
-            <div className="mb-5 px-2">
-                <Link
-                    to="/"
-                    className="flex items-center gap-3 rounded-3xl border border-white/10 bg-[#101010] px-4 py-3 text-white transition hover:border-white/20"
-                    onClick={onClose}
-                    aria-label="StreamTube home"
-                >
-                    <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-[#ff3d3d]">
-                        <img
-                            src="/logo.png"
-                            alt="StreamTube"
-                            className="absolute -left-7.75 -top-2 h-27.5 w-27.5 max-w-none object-contain"
-                        />
-                    </div>
-                    <div>
-                        <p className="text-sm font-semibold">StreamTube</p>
-                        <p className="text-xs text-[#999]">Creator Studio</p>
-                    </div>
-                </Link>
-            </div>
+            
 
             <div className="space-y-1 px-2">
                 {mainLinks.map(({ to, icon, label, exact, auth }) => {
@@ -152,7 +132,7 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
             </div>
 
             {isAuthenticated && user && (
-                <div className="mt-auto rounded-3xl border border-white/10 bg-[#101010] p-4">
+                <div className="mt-auto rounded-3xl border border-white/10 bg-[#101010] p-4 mb-15">
                     <Link
                         to={`/channel/${user.username}`}
                         className={`flex items-center gap-3 rounded-3xl bg-[#111] p-3 transition hover:bg-white/5 ${isCollapsed ? "justify-center" : ""}`}
@@ -176,10 +156,16 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
     return (
         <>
             <motion.aside
-                animate={{ width: desktopSidebarWidth }}
-                transition={{ type: "spring", stiffness: 280, damping: 30 }}
+                animate={{
+                    width: isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_OPEN_WIDTH,
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 30,
+                    mass: 0.8,
+                }}
                 className="hidden lg:flex lg:flex-col lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:border-r lg:border-white/10 lg:bg-[#090909]"
-                style={{ minWidth: desktopSidebarWidth, width: desktopSidebarWidth }}
             >
                 {sidebarContent}
             </motion.aside>
@@ -201,15 +187,15 @@ const Sidebar = ({ isOpen, isCollapsed, onClose }) => {
                             animate={{ x: 0 }}
                             exit={{ x: -320 }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed top-0 left-0 z-50 flex h-full w-72 flex-col overflow-hidden border-r border-white/10 bg-[#101010]"
+                            className="fixed top-20 left-0 bottom-0 z-40 flex w-72 flex-col overflow-hidden border-r border-white/10 bg-[#101010]"
                         >
                             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                                 <Link to="/" className="flex items-center gap-3" onClick={onClose} aria-label="StreamTube home">
-                                    <div className="relative h-10 w-10 overflow-hidden rounded-2xl bg-[#ff3d3d]">
+                                    <div className="flex h-10 w-10 items-center justify-center shrink-0 overflow-hidden rounded-2xl bg-[#ff3d3d]">
                                         <img
                                             src="/logo.png"
                                             alt="StreamTube"
-                                            className="absolute -left-7 -top-1.75 h-27.5 w-27.5 max-w-none object-contain"
+                                            className="h-full w-full object-contain"
                                         />
                                     </div>
                                     <div>
