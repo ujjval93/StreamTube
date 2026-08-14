@@ -63,7 +63,7 @@ const Playlists = () => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-8 p-5">
                 <div>
                     <h1 className="text-white text-2xl font-bold tracking-tight">Playlists</h1>
                     <p className="text-[#555] text-sm mt-1">

@@ -41,8 +41,8 @@ const Layout = () => {
         <div className="min-h-screen bg-[#0f0f0f] text-white">
             <Navbar onMenuClick={() => setSidebarOpen((prev) => !prev)} isCollapsed={!sidebarOpen} />
 
-            <div className="pt-16">
-                <div className="flex min-h-[calc(100vh-4rem)] overflow-hidden">
+            <div className="pt-20 lg:pt-22">
+                <div className="flex min-h-[calc(100vh-5rem)] lg:min-h-[calc(100vh-5.5rem)] overflow-hidden">
                     <Sidebar
                         isOpen={sidebarOpen}
                         isCollapsed={!sidebarOpen}

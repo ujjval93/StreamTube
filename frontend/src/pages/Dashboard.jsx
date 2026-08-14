@@ -30,7 +30,7 @@ const formatDate = (dateString) => {
 
 // Stat Card
 const StatCard = ({ icon: Icon, label, value, color, bgColor, trend }) => (
-    <div className={`relative overflow-hidden rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-all duration-300 hover:-translate-y-0.5 group ${bgColor}`}>
+    <div className={`relative overflow-hidden rounded-2xl border border-white/5 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/10 group sm:p-5 ${bgColor}`}>
         {/* Background glow */}
         <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10 blur-xl ${color}`} />
 
@@ -186,18 +186,18 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="mx-auto max-w-7xl px-2 py-3 sm:px-3 sm:py-4 lg:p-5">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
+            <div className="mb-6 flex flex-col items-stretch gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="min-w-0">
                     <h1 className="text-white text-2xl font-bold tracking-tight">Dashboard</h1>
-                    <p className="text-white/40 text-sm mt-1">
-                        Welcome back, <span className="text-white/70 font-medium">{user?.fullName}</span> 👋
+                    <p className="mt-1 text-sm text-white/40">
+                        Welcome back, <span className="font-medium text-white/70">{user?.fullName}</span> 👋
                     </p>
                 </div>
                 <Link
                     to="/upload"
-                    className="flex items-center gap-2 bg-white hover:bg-white/90 text-black px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg shadow-white/10 hover:shadow-white/20"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black shadow-lg shadow-white/10 transition-all duration-200 hover:bg-orange-500/90 hover:shadow-white/20 sm:w-auto"
                 >
                     <FiUploadCloud className="text-base" />
                     Upload Video
@@ -208,7 +208,7 @@ const Dashboard = () => {
             {statsLoading ? (
                 <StatsSkeleton />
             ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 lg:grid-cols-4">
                     <StatCard
                         icon={FiEye}
                         label="Total Views"
@@ -241,29 +241,29 @@ const Dashboard = () => {
             )}
 
             {/* Videos Table */}
-            <div className="bg-[#111111] border border-white/8 rounded-2xl overflow-hidden">
+            <div className="overflow-hidden rounded-2xl border border-white/8 bg-[#111111]">
                 {/* Table Header */}
-                <div className="flex items-center justify-between p-5 border-b border-white/8 gap-4 flex-wrap">
-                    <div className="flex items-center gap-2">
-                        <FiBarChart2 className="text-white/40" />
+                <div className="flex flex-col gap-3 border-b border-white/8 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <FiBarChart2 className="shrink-0 text-white/40" />
                         <h2 className="text-white font-semibold">Your Videos</h2>
                         {!videosLoading && (
-                            <span className="text-white/30 text-xs bg-white/5 px-2 py-0.5 rounded-full">
+                            <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/30">
                                 {videos.length}
                             </span>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:flex-wrap">
                         {/* Search */}
-                        <div className="relative">
-                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+                        <div className="relative w-full sm:w-48">
+                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-white/30" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
                                 placeholder="Search videos..."
-                                className="bg-white/5 border border-white/8 rounded-xl pl-9 pr-4 py-2 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 w-48 transition-all"
+                                className="w-full min-w-0 rounded-xl border border-white/8 bg-white/5 py-2 pl-9 pr-4 text-sm text-white placeholder:text-white/20 transition-all focus:border-white/20 focus:outline-none"
                             />
                         </div>
 
@@ -274,7 +274,7 @@ const Dashboard = () => {
                                 const [sb, st] = e.target.value.split("-");
                                 setSortBy(sb); setSortType(st); setPage(1);
                             }}
-                            className="bg-white/5 border border-white/8 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-white/20 transition-all cursor-pointer"
+                            className="w-full cursor-pointer rounded-xl border border-white/8 bg-gray-800 px-3 py-2 text-sm text-black transition-all focus:border-white/20 focus:outline-none sm:w-auto"
                         >
                             <option value="createdAt-desc">Newest First</option>
                             <option value="createdAt-asc">Oldest First</option>
@@ -317,56 +317,56 @@ const Dashboard = () => {
                         {videos.map((video) => (
                             <div
                                 key={video._id}
-                                className="flex items-center gap-4 p-4 hover:bg-white/2 transition-colors group"
+                                className="group flex flex-col gap-3 p-3 transition-colors hover:bg-white/2 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
                             >
                                 {/* Thumbnail */}
-                                <Link to={`/video/${video._id}`} className="shrink-0">
-                                    <div className="w-32 aspect-video rounded-xl overflow-hidden bg-[#1a1a1a] relative">
+                                <Link to={`/video/${video._id}`} className="w-full shrink-0 sm:w-32">
+                                    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-[#1a1a1a] sm:w-32">
                                         <img
                                             src={video.thumbnail?.url || video.thumbnail}
                                             alt={video.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
                                         {!video.isPublished && (
-                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                                <span className="text-white/60 text-xs font-medium">Draft</span>
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                                <span className="text-xs font-medium text-white/60">Draft</span>
                                             </div>
                                         )}
                                     </div>
                                 </Link>
 
                                 {/* Info */}
-                                <div className="flex-1 min-w-0">
+                                <div className="w-full min-w-0 flex-1">
                                     <Link to={`/video/${video._id}`}>
-                                        <h3 className="text-white text-sm font-medium line-clamp-1 hover:text-white/80 transition-colors">
+                                        <h3 className="line-clamp-1 text-sm font-medium text-white transition-colors hover:text-white/80">
                                             {video.title}
                                         </h3>
                                     </Link>
-                                    <p className="text-white/30 text-xs mt-0.5 line-clamp-1">{video.description}</p>
-                                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                        <span className="flex items-center gap-1 text-white/30 text-xs">
+                                    <p className="mt-0.5 line-clamp-1 text-xs text-white/30">{video.description}</p>
+                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                        <span className="flex items-center gap-1 text-xs text-white/30">
                                             <FiEye className="text-xs" />
                                             {formatViews(video.views)}
                                         </span>
-                                        <span className="w-1 h-1 rounded-full bg-white/15" />
-                                        <span className="flex items-center gap-1 text-white/30 text-xs">
+                                        <span className="h-1 w-1 rounded-full bg-white/15" />
+                                        <span className="flex items-center gap-1 text-xs text-white/30">
                                             <FiThumbsUp className="text-xs" />
                                             {video.likesCount || 0}
                                         </span>
-                                        <span className="w-1 h-1 rounded-full bg-white/15" />
-                                        <span className="text-white/30 text-xs">{formatDate(video.createdAt)}</span>
+                                        <span className="h-1 w-1 rounded-full bg-white/15" />
+                                        <span className="text-xs text-white/30">{formatDate(video.createdAt)}</span>
                                     </div>
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex items-center gap-2 shrink-0">
+                                <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:flex-nowrap sm:justify-start">
                                     {/* Publish Toggle */}
                                     <button
                                         onClick={() => handleTogglePublish(video._id, video.isPublished)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                                        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                                             video.isPublished
-                                                ? "bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/20"
-                                                : "bg-white/5 text-white/40 hover:bg-white/10 border border-white/5"
+                                                ? "border border-green-500/20 bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                                                : "border border-white/5 bg-white/5 text-white/40 hover:bg-white/10"
                                         }`}
                                     >
                                         {video.isPublished
@@ -378,7 +378,7 @@ const Dashboard = () => {
                                     {/* View */}
                                     <Link
                                         to={`/video/${video._id}`}
-                                        className="p-2 rounded-lg bg-white/5 text-white/40 hover:bg-white/10 hover:text-white transition-all border border-white/5"
+                                        className="rounded-lg border border-white/5 bg-white/5 p-2 text-white/40 transition-all hover:bg-white/10 hover:text-white"
                                         title="View"
                                     >
                                         <FiExternalLink className="text-sm" />
@@ -387,7 +387,7 @@ const Dashboard = () => {
                                     {/* Delete */}
                                     <button
                                         onClick={() => setDeleteConfirm(video._id)}
-                                        className="p-2 rounded-lg bg-white/5 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-all border border-white/5 hover:border-red-500/20"
+                                        className="rounded-lg border border-white/5 bg-white/5 p-2 text-white/40 transition-all hover:border-red-500/20 hover:bg-red-500/20 hover:text-red-400"
                                         title="Delete"
                                     >
                                         <FiTrash2 className="text-sm" />
@@ -400,20 +400,20 @@ const Dashboard = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-3 p-4 border-t border-white/8">
+                    <div className="flex flex-wrap items-center justify-center gap-2 border-t border-white/8 p-3 sm:p-4">
                         <button
                             onClick={() => setPage((p) => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="px-4 py-2 rounded-xl bg-white/5 text-white text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors border border-white/5"
+                            className="rounded-xl border border-white/5 bg-white/5 px-2.5 py-1.5 text-xs text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30 sm:px-3 sm:py-2 sm:text-sm"
                         >
                             Previous
                         </button>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center justify-center gap-1">
                             {Array.from({ length: totalPages }).map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setPage(i + 1)}
-                                    className={`w-8 h-8 rounded-lg text-sm transition-colors ${
+                                    className={`h-8 w-8 rounded-lg text-sm transition-colors ${
                                         page === i + 1
                                             ? "bg-white text-black font-medium"
                                             : "text-white/40 hover:text-white hover:bg-white/10"
@@ -426,7 +426,7 @@ const Dashboard = () => {
                         <button
                             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                             disabled={page === totalPages}
-                            className="px-4 py-2 rounded-xl bg-white/5 text-white text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors border border-white/5"
+                            className="rounded-xl border border-white/5 bg-white/5 px-2.5 py-1.5 text-xs text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30 sm:px-3 sm:py-2 sm:text-sm"
                         >
                             Next
                         </button>
